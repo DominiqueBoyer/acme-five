@@ -1,13 +1,112 @@
 <html>
   <head>
+      <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+      <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/react-router-dom/5.0.1/react-router-dom.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.js"></script>
+      <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <style>
+      nav{
+        display: flex;
+        justify-content: space-around;
+      }
+      .active{
+        background-color: tomato;
+        padding: 1rem;
+        color: white;
+      }
+
     </style>
   </head>
   <body>
 
     <div id='root'></div>
 
-    <script>
+    <script type='text/babel'>
+      const root = document.querySelector('#root');
+      const { render } = ReactDOM;
+      const { Component } = React;
+      const { HashRouter, Route, Switch, Redirect, NavLink } = ReactRouterDOM;
+
+      const Nav = ({ products })=> {
+        const under = products.filter(product => product.suggestedPrice < 6 )
+        return (
+          <div>
+            <h1>Acme 6 -  Over / Under</h1>
+            <nav>
+              <NavLink to='/underFive'>Under 6 ({under.length}) </NavLink>
+              <NavLink to='/overFive'>6 and Over ({products.length - under.length}) </NavLink>
+
+            </nav>
+          </div>
+        );
+      };
+
+      const UnderFive = ({ match, products, companies, offerings})=> {
+        return (
+          products.filter(product => product.suggestedPrice < 6 ).map(product =>{
+            return (
+              <ul key={product.id}>
+              <div>{product.name}</div>
+              <div>{product.suggestedPrice}.00</div>
+              <hr />
+            </ul>
+            );
+
+            }
+          )
+        );
+      };
+      const OverFive = ({products, companies, offerings}) => {
+        return (
+          products.filter(product => product.suggestedPrice > 6 ).map(product =>{
+            return (
+              <ul key={product.id}>
+                <div>{product.name}</div>
+                <div>{product.suggestedPrice}.00</div>
+                <hr />
+              </ul>
+            );
+
+            }
+          )
+        );
+      };
+
+      class App extends Component {
+        constructor(){
+          super();
+          this.state = {
+            companies: [],
+            products: [],
+            offerings: []
+          };
+        }
+        componentDidMount(){
+          const urls = [
+            'https://acme-users-api-rev.herokuapp.com/api/companies',
+            'https://acme-users-api-rev.herokuapp.com/api/products',
+            'https://acme-users-api-rev.herokuapp.com/api/offerings'
+          ];
+          Promise.all(urls.map(url => axios.get(url)))
+            .then(responses => responses.map(response => response.data))
+            .then(([ companies, products, offerings ])=> this.setState({companies, products, offerings}))
+        }
+        render(){
+          const { companies, products, offerings} = this.state
+
+          return (
+            <HashRouter>
+              <Route render ={ () => <Nav products={products}/> }/>
+              <Switch>
+                <Route path='/underFive' render={ (props) => <UnderFive {...props}companies={companies} products={products} offering={offerings}/> }/>
+                <Route path='/overFive' render={ () => <OverFive companies={companies} products={products} offering={offerings}/> }/>
+              </Switch>
+            </HashRouter>
+          );
+        }
+      }
+      render( <App/> , root);
 
     </script>
   </body>
