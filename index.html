@@ -26,7 +26,7 @@
       const root = document.querySelector('#root');
       const { render } = ReactDOM;
       const { Component } = React;
-      const { HashRouter, Route, Switch, Redirect, NavLink } = ReactRouterDOM;
+      const { HashRouter, Route, Switch, Redirect, NavLink, Link } = ReactRouterDOM;
 
       const Nav = ({ products })=> {
         const under = products.filter(product => product.suggestedPrice < 6 )
@@ -42,34 +42,82 @@
         );
       };
 
+      // class Product extends Component{
+      //   constructor(){
+      //     super();
+      //     this.state = {
+      //       companies: companies,
+      //       products: products,
+      //       offerings: offerings
+      //     };
+      //   }
+      //   render(){
+      //     return (<h1>Product</h1>);
+      //   }
+      // }
+
+      const Products = ({products, companies, offerings, match})=> {
+        const _products = products.map(product => {
+          let offers = offerings.filter(offer => offer.productId === product.id).map(offer => {
+            const companyInfo = companies.find(company => company.id === offer.companyId)
+            return {...offer, companyInfo};
+          })
+          return {...product, offers}
+        });
+        const _product = _products.find(product => product.id === match.params.id)
+        console.log(_product)
+
+       return (
+          _product.offers.map(offer => {
+            return (
+              <div>
+                <div>Offered At {offer.price}</div>
+                <div>by {offer.companyInfo.name}</div>
+
+              </div>
+            );
+            })
+       )
+
+      };
+
       const UnderFive = ({ match, products, companies, offerings})=> {
         return (
-          products.filter(product => product.suggestedPrice < 6 ).map(product =>{
-            return (
-              <ul key={product.id}>
-              <div>{product.name}</div>
-              <div>{product.suggestedPrice}.00</div>
-              <hr />
+          <div>
+            <ul>
+              {
+                products.filter(product => product.suggestedPrice < 6).map(product => {
+                  return (
+                    <div key={product.id}>
+                    <Link to={`/underFive/${product.id}`}>{product.name}</Link>
+                    <div> {product.suggestedPrice}.00 </div>
+                    <hr/>
+                    </div>
+                  );
+                })
+              }
             </ul>
-            );
-
-            }
-          )
+            <Route path='/underFive/:id' render = {({match})=> <Products products={products} companies={companies} offerings={offerings} match={match}/>} />
+          </div>
         );
       };
+
+
       const OverFive = ({products, companies, offerings}) => {
         return (
-          products.filter(product => product.suggestedPrice > 6 ).map(product =>{
-            return (
-              <ul key={product.id}>
-                <div>{product.name}</div>
-                <div>{product.suggestedPrice}.00</div>
-                <hr />
-              </ul>
-            );
-
-            }
-          )
+          <ul>
+              {
+                products.filter(product => product.suggestedPrice > 6).map(product => {
+                  return (
+                    <div key={product.id}>
+                    <Link to={`/overFive/${product.id}`}>{product.name}</Link>
+                    <div> {product.suggestedPrice}.00 </div>
+                    <hr/>
+                    </div>
+                  );
+                })
+              }
+            </ul>
         );
       };
 
@@ -99,7 +147,8 @@
             <HashRouter>
               <Route render ={ () => <Nav products={products}/> }/>
               <Switch>
-                <Route path='/underFive' render={ (props) => <UnderFive {...props}companies={companies} products={products} offering={offerings}/> }/>
+                <Route path='/underFive' render={ (props) => <UnderFive {...props}companies={companies} products={products} offerings={offerings}/> }/>
+
                 <Route path='/overFive' render={ () => <OverFive companies={companies} products={products} offering={offerings}/> }/>
               </Switch>
             </HashRouter>
