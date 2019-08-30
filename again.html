@@ -48,23 +48,32 @@
           );
         } //end of Navbracket
 
-        const Under =({ match, products}) =>{
-          console.log(match, products)
-          console.log(match.path)
+        const Under =({ products}) =>{
           return (
-            // match.path ==='/underFive' ? < : >
-
-                products.filter(product => product.suggestedPrice < num ).map(product => {
-                  return (
-                    <div key={product.id}>
-                      <Link to={`/underFive/${product.id}`}>{product.name}</Link>
-                      <div>{product.suggestedPrice}.00</div>
-                      <hr/>
-                    </div>
-                  );
-                })
+            products.filter(product => product.suggestedPrice < num ).map(product => {
+              return (
+                <div key={product.id}>
+                  <Link to={`/underFive/${product.id}`}>{product.name}</Link>
+                  <div>{product.suggestedPrice}.00</div>
+                  <hr/>
+                </div>
+              );
+            })
           );
-        }
+        } //end of under
+        const Over =({ products}) =>{
+          return (
+            products.filter(product => product.suggestedPrice > num ).map(product => {
+              return (
+                <div key={product.id}>
+                  <Link to={`/overFive/${product.id}`}>{product.name}</Link>
+                  <div>{product.suggestedPrice}.00</div>
+                  <hr/>
+                </div>
+              );
+            })
+          );
+        } //end of over
 
         class App extends Component{
           constructor(){
@@ -84,7 +93,7 @@
                 <Route render ={()=> <Nav products={products}/> }/>
                 <Switch>
                   <Route path='/underFive' render={ (props)=> <Under {...props} products={ products } />} />
-                  <Route path='/overFive' render={ (props)=> <Under {...props} products={ products } />} />
+                  <Route path='/overFive' render={ (props)=> <Over {...props} products={ products } />} />
                 </Switch>
               </HashRouter>
             );
