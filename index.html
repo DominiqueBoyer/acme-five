@@ -6,6 +6,9 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.js"></script>
       <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <style>
+      body{
+        padding: 2rem;
+      }
       nav{
         display: flex;
         justify-content: space-around;
@@ -29,13 +32,13 @@
       const { HashRouter, Route, Switch, Redirect, NavLink, Link } = ReactRouterDOM;
 
       const Nav = ({ products })=> {
-        const under = products.filter(product => product.suggestedPrice < 6 )
+        const under = products.filter(product => product.suggestedPrice < 4 )
         return (
           <div>
-            <h1>Acme 6 -  Over / Under</h1>
+            <h1>Acme 4 -  Over / Under</h1>
             <nav>
-              <NavLink to='/underFive'>Under 6 ({under.length}) </NavLink>
-              <NavLink to='/overFive'>6 and Over ({products.length - under.length}) </NavLink>
+              <NavLink to='/underFive'>Under 4 ({under.length}) </NavLink>
+              <NavLink to='/overFive'>4 and Over ({products.length - under.length}) </NavLink>
 
             </nav>
           </div>
@@ -67,17 +70,36 @@
         const _product = _products.find(product => product.id === match.params.id)
         console.log(_product)
 
+        console.log(match)
+        if(match.params.id === _product.id){
+          console.log('same id')
+        }
+
        return (
           _product.offers.map(offer => {
             return (
               <div>
                 <div>Offered At {offer.price}</div>
                 <div>by {offer.companyInfo.name}</div>
-
+                <hr />
               </div>
             );
             })
-       )
+          // <h1>Product Stuff</h1>
+       );
+      //  return (
+      //    match.params.id === _product.id ? (
+      //     offers.map(offer => {
+      //       return (
+      //         <div key={_product.id}>
+      //           <div>Offered At {offer.price}</div>
+      //           <div>by {offer.companyInfo.name}</div>
+      //           <hr />
+      //         </div>
+      //       );
+      //       })
+      //     // <h1>Product Stuff</h1>
+      //  ) : null)
 
       };
 
@@ -86,18 +108,19 @@
           <div>
             <ul>
               {
-                products.filter(product => product.suggestedPrice < 6).map(product => {
+                products.filter(product => product.suggestedPrice < 4).map(product => {
                   return (
                     <div key={product.id}>
                     <Link to={`/underFive/${product.id}`}>{product.name}</Link>
                     <div> {product.suggestedPrice}.00 </div>
+                    <Route path='/underFive/:id' render = {({match})=> <Products products={products} companies={companies} offerings={offerings} match={match}/>} />
                     <hr/>
                     </div>
                   );
                 })
               }
             </ul>
-            <Route path='/underFive/:id' render = {({match})=> <Products products={products} companies={companies} offerings={offerings} match={match}/>} />
+
           </div>
         );
       };
@@ -107,7 +130,7 @@
         return (
           <ul>
               {
-                products.filter(product => product.suggestedPrice > 6).map(product => {
+                products.filter(product => product.suggestedPrice > 4).map(product => {
                   return (
                     <div key={product.id}>
                     <Link to={`/overFive/${product.id}`}>{product.name}</Link>
@@ -148,9 +171,9 @@
               <Route render ={ () => <Nav products={products}/> }/>
               <Switch>
                 <Route path='/underFive' render={ (props) => <UnderFive {...props}companies={companies} products={products} offerings={offerings}/> }/>
-
                 <Route path='/overFive' render={ () => <OverFive companies={companies} products={products} offering={offerings}/> }/>
               </Switch>
+              <Redirect to='/underFive'/>
             </HashRouter>
           );
         }
